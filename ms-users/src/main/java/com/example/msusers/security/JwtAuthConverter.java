@@ -1,4 +1,4 @@
-package com.msbills.security;
+package com.example.msusers.security;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -13,7 +13,10 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -26,7 +29,6 @@ public class JwtAuthConverter implements Converter<Jwt, AbstractAuthenticationTo
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         resourcesRoles.addAll(extractRoles("resource_access", objectMapper.readTree(objectMapper.writeValueAsString(jwt)).get("claims")));
-        resourcesRoles.addAll(extractGroups("groups", objectMapper.readTree(objectMapper.writeValueAsString(jwt)).get("claims")));
         return resourcesRoles;
     }
 
@@ -46,19 +48,6 @@ public class JwtAuthConverter implements Converter<Jwt, AbstractAuthenticationTo
         return authorityList;
     }
 
-    private static List<GrantedAuthority> extractGroups(String route, JsonNode jwt) {
-        Set<String> rolesWithPrefix = new HashSet<>();
-
-        jwt.path(route)
-                .elements()
-                .forEachRemaining(g -> rolesWithPrefix.add("GROUP_" + g.asText().substring(1)));
-
-        final List<GrantedAuthority> authorityList =
-                AuthorityUtils.createAuthorityList(rolesWithPrefix.toArray(new String[0]));
-
-        return authorityList;
-    }
-
 
     public AbstractAuthenticationToken convert(final Jwt source) {
         Collection<GrantedAuthority> authorities = null;
@@ -71,9 +60,6 @@ public class JwtAuthConverter implements Converter<Jwt, AbstractAuthenticationTo
     }
 
     public Collection<GrantedAuthority> getGrantedAuthorities(Jwt source) throws JsonProcessingException {
-        Collection collection = (Collection) Stream.concat(
-                this.defaultGrantedAuthoritiesConverter.convert(source).stream(),
-                extractResourceRoles(source).stream()).collect(Collectors.toSet());
-        return collection;
+        return (Collection) Stream.concat(this.defaultGrantedAuthoritiesConverter.convert(source).stream(), extractResourceRoles(source).stream()).collect(Collectors.toSet());
     }
 }

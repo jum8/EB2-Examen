@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: ms-users
+
+eureka:
+  instance:
+    hostname: localhost
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/examen
+server:
+  port: 8081
+dh:
+  keycloak:
+    realm: examen
+    serverUrl: http://localhost:8080
+    clientId: users-client
+    clientSecret: L6VM9ImgMXDmFhdsOrPMVdZMqK0uRaXp
+    token-uri: http://localhost:8080/realms/examen/protocol/openid-connect/token

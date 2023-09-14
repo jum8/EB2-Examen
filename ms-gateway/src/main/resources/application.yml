@@ -22,15 +22,22 @@ spring:
         - id: ms-bill
           uri: lb://ms-bill
           predicates:
-            - Path=/api/v1/**
+            - Path=/api/v1/bills/**
           filters:
             - StripPrefix=2
+        - id: ms-users
+          uri: lb://ms-users
+          predicates:
+            - Path=/api/v1/users/**
+          filters:
+            - StripPrefix=2
+
   security:
     oauth2:
       client:
         provider:
           keycloak-provider:
-            issuer-uri: http://localhost:8080/realms/examen
+              issuer-uri: http://localhost:8080/realms/examen
         registration:
           gateway-service:
             provider: keycloak-provider
